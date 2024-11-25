@@ -10,6 +10,8 @@ public class App {
         System.out.println(result);
         String product = multiplyNumbers(num1, num2, num1.length() - 1, num2.length() - 1, "0");
         System.out.println(product);
+        String diff = diffrentioation(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+        System.out.println(diff);
     }
     public static String addNumbers(String num1, String num2, int num1pointer, int num2pointer, int carry) {
         if (num1pointer < 0 && num2pointer < 0 && carry == 0) {
@@ -43,5 +45,16 @@ public class App {
             newResult = addIntermediateResult(newResult, sum / 10, position + 1);
         }
         return newResult;
+    }
+    public static String diffrentioation(String num1, String num2, int num1pointer, int num2pointer, int carry){
+        if (num1pointer < 0 && num2pointer < 0 && carry == 0) {
+            return "";
+        }
+        int digit1 = num1pointer >= 0 ? num1.charAt(num1pointer) - '0' : 0;
+        int digit2 = num2pointer >= 0 ? num2.charAt(num2pointer) - '0' : 0;
+        int sum = digit1 - digit2 - carry;
+        carry = sum / 10;
+        sum = sum % 10;
+        return diffrentioation(num1, num2, num1pointer - 1, num2pointer - 1, carry) + sum;
     }
 }
