@@ -1,32 +1,28 @@
+import java.util.Scanner;
+
 public class App {
     public static void main(String[] args) throws Exception {
-        String num1 = "-10";
-        String num2 = "-90";
+        Scanner scanner = new Scanner(System.in);
+
+        // Input numbers
+        // System.out.println("Enter first number:");
+        String num1 = String.valueOf(scanner.nextLong());
+        // System.out.println("Enter second number:");
+        String num2 = String.valueOf(scanner.nextLong());
+
+        // Input operation
+        // System.out.println("Enter operation (+, -, *, /):");
+        String operation = scanner.next().toUpperCase();
 
         // Perform operations
-        String result = handleSigns(num1, num2, Operation.ADD);
-        System.out.println("Addition: " + result);
+        String result = handleSigns(num1, num2, operation.toUpperCase());
+        System.out.println(result);
 
-        String diff = handleSigns(num1, num2, Operation.SUBTRACT);
-        System.out.println("Subtraction: " + diff);
-
-        String product = handleSigns(num1, num2, Operation.MULTIPLY);
-        System.out.println("Multiplication: " + product);
-
-        String division = handleSigns(num1, num2, Operation.DIVIDE);
-        System.out.println("Division: " + division);
-    }
-
-    // Enum for operations
-    enum Operation {
-        ADD,
-        SUBTRACT,
-        MULTIPLY,
-        DIVIDE
+        scanner.close();
     }
 
     // Handle signs for operations
-    public static String handleSigns(String num1, String num2, Operation operation) {
+    public static String handleSigns(String num1, String num2, String operation) {
         boolean isNum1Negative = num1.startsWith("-");
         boolean isNum2Negative = num2.startsWith("-");
 
@@ -34,56 +30,47 @@ public class App {
         num1 = isNum1Negative ? num1.substring(1) : num1;
         num2 = isNum2Negative ? num2.substring(1) : num2;
 
-        String result;
+        String result = "";
         boolean resultIsNegative = false;
 
-        switch (operation) {
-            case ADD:
-                if (isNum1Negative == isNum2Negative) {
-                    // Same signs: result has the same sign
-                    result = addNumbers(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+        if ("+".equalsIgnoreCase(operation)) {
+            if (isNum1Negative == isNum2Negative) {
+                // Same signs: result has the same sign
+                result = addNumbers(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+                resultIsNegative = isNum1Negative;
+            } else {
+                // Different signs: subtract the smaller from the larger
+                if (compareAbsoluteValues(num1, num2) >= 0) {
+                    result = diffrentioation(num1, num2, num1.length() - 1, num2.length() - 1, 0);
                     resultIsNegative = isNum1Negative;
                 } else {
-                    // Different signs: subtract the smaller from the larger
-                    if (compareAbsoluteValues(num1, num2) >= 0) {
-                        result = diffrentioation(num1, num2, num1.length() - 1, num2.length() - 1, 0);
-                        resultIsNegative = isNum1Negative;
-                    } else {
-                        result = diffrentioation(num2, num1, num2.length() - 1, num1.length() - 1, 0);
-                        resultIsNegative = isNum2Negative;
-                    }
+                    result = diffrentioation(num2, num1, num2.length() - 1, num1.length() - 1, 0);
+                    resultIsNegative = isNum2Negative;
                 }
-                break;
-
-            case SUBTRACT:
-                if (isNum1Negative == isNum2Negative) {
-                    // Both numbers have the same sign
-                    if (compareAbsoluteValues(num1, num2) >= 0) {
-                        result = diffrentioation(num1, num2, num1.length() - 1, num2.length() - 1, 0);
-                        resultIsNegative = isNum1Negative;
-                    } else {
-                        result = diffrentioation(num2, num1, num2.length() - 1, num1.length() - 1, 0);
-                        resultIsNegative = !isNum1Negative;
-                    }
-                } else {
-                    // Different signs: perform addition
-                    result = addNumbers(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+            }
+        } else if ("-".equalsIgnoreCase(operation)) {
+            if (isNum1Negative == isNum2Negative) {
+                // Both numbers have the same sign
+                if (compareAbsoluteValues(num1, num2) >= 0) {
+                    result = diffrentioation(num1, num2, num1.length() - 1, num2.length() - 1, 0);
                     resultIsNegative = isNum1Negative;
+                } else {
+                    result = diffrentioation(num2, num1, num2.length() - 1, num1.length() - 1, 0);
+                    resultIsNegative = !isNum1Negative;
                 }
-                break;
-
-            case MULTIPLY:
-                result = multiplyNumbers(num1, num2, num1.length() - 1, num2.length() - 1, "0");
-                resultIsNegative = isNum1Negative != isNum2Negative;
-                break;
-
-            case DIVIDE:
-                result = distribution(num1, num2, 0, 0);
-                resultIsNegative = isNum1Negative != isNum2Negative;
-                break;
-
-            default:
-                throw new IllegalArgumentException("Unsupported operation");
+            } else {
+                // Different signs: perform addition
+                result = addNumbers(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+                resultIsNegative = isNum1Negative;
+            }
+        } else if ("*".equalsIgnoreCase(operation)) {
+            result = multiplyNumbers(num1, num2, num1.length() - 1, num2.length() - 1, "0");
+            resultIsNegative = isNum1Negative != isNum2Negative;
+        } else if ("/".equalsIgnoreCase(operation)) {
+            result = distribution(num1, num2, 0, 0);
+            resultIsNegative = isNum1Negative != isNum2Negative;
+        } else {
+            throw new IllegalArgumentException("Unsupported operation");
         }
 
         // Add the negative sign if needed
