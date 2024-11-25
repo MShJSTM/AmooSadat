@@ -1,20 +1,101 @@
 public class App {
     public static void main(String[] args) throws Exception {
-        String num1 = "100000000000000000000000000000000000000000000";
-        String num2 = "1000000000000";
+        String num1 = "-10";
+        String num2 = "-90";
 
         // Perform operations
-        String result = addNumbers(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+        String result = handleSigns(num1, num2, Operation.ADD);
         System.out.println("Addition: " + result);
 
-        String product = multiplyNumbers(num1, num2, num1.length() - 1, num2.length() - 1, "0");
-        System.out.println("Multiplication: " + product);
-
-        String diff = diffrentioation(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+        String diff = handleSigns(num1, num2, Operation.SUBTRACT);
         System.out.println("Subtraction: " + diff);
 
-        String division = distribution(num1, num2, 0, 0);
+        String product = handleSigns(num1, num2, Operation.MULTIPLY);
+        System.out.println("Multiplication: " + product);
+
+        String division = handleSigns(num1, num2, Operation.DIVIDE);
         System.out.println("Division: " + division);
+    }
+
+    // Enum for operations
+    enum Operation {
+        ADD,
+        SUBTRACT,
+        MULTIPLY,
+        DIVIDE
+    }
+
+    // Handle signs for operations
+    public static String handleSigns(String num1, String num2, Operation operation) {
+        boolean isNum1Negative = num1.startsWith("-");
+        boolean isNum2Negative = num2.startsWith("-");
+
+        // Work with absolute values
+        num1 = isNum1Negative ? num1.substring(1) : num1;
+        num2 = isNum2Negative ? num2.substring(1) : num2;
+
+        String result;
+        boolean resultIsNegative = false;
+
+        switch (operation) {
+            case ADD:
+                if (isNum1Negative == isNum2Negative) {
+                    // Same signs: result has the same sign
+                    result = addNumbers(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+                    resultIsNegative = isNum1Negative;
+                } else {
+                    // Different signs: subtract the smaller from the larger
+                    if (compareAbsoluteValues(num1, num2) >= 0) {
+                        result = diffrentioation(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+                        resultIsNegative = isNum1Negative;
+                    } else {
+                        result = diffrentioation(num2, num1, num2.length() - 1, num1.length() - 1, 0);
+                        resultIsNegative = isNum2Negative;
+                    }
+                }
+                break;
+
+            case SUBTRACT:
+                if (isNum1Negative == isNum2Negative) {
+                    // Both numbers have the same sign
+                    if (compareAbsoluteValues(num1, num2) >= 0) {
+                        result = diffrentioation(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+                        resultIsNegative = isNum1Negative;
+                    } else {
+                        result = diffrentioation(num2, num1, num2.length() - 1, num1.length() - 1, 0);
+                        resultIsNegative = !isNum1Negative;
+                    }
+                } else {
+                    // Different signs: perform addition
+                    result = addNumbers(num1, num2, num1.length() - 1, num2.length() - 1, 0);
+                    resultIsNegative = isNum1Negative;
+                }
+                break;
+
+            case MULTIPLY:
+                result = multiplyNumbers(num1, num2, num1.length() - 1, num2.length() - 1, "0");
+                resultIsNegative = isNum1Negative != isNum2Negative;
+                break;
+
+            case DIVIDE:
+                result = distribution(num1, num2, 0, 0);
+                resultIsNegative = isNum1Negative != isNum2Negative;
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported operation");
+        }
+
+        // Add the negative sign if needed
+        return (resultIsNegative ? "-" : "") + trimLeadingZeros(result);
+    }
+
+    // Compare two absolute values
+    private static int compareAbsoluteValues(String num1, String num2) {
+        if (num1.length() != num2.length()) {
+            return Integer.compare(num1.length(), num2.length());
+        }
+        return num1.compareTo(num2);
     }
 
     // Recursive addition of large numbers
@@ -48,7 +129,8 @@ public class App {
             result = "0".repeat(position - result.length() + 1) + result;
         }
         int sum = (result.charAt(result.length() - 1 - position) - '0') + mul;
-        String newResult = result.substring(0, result.length() - 1 - position) + (sum % 10) + result.substring(result.length() - position);
+        String newResult = result.substring(0, result.length() - 1 - position) + (sum % 10)
+                + result.substring(result.length() - position);
         if (sum >= 10) {
             newResult = addIntermediateResult(newResult, sum / 10, position + 1);
         }
@@ -105,5 +187,9 @@ public class App {
         int maxDigits = 9; // int's limit is about 10 digits
         String partialNum2 = trimmedNum2.substring(0, Math.min(trimmedNum2.length(), maxDigits));
         return Integer.parseInt(partialNum2);
+    }
+
+    private static String trimLeadingZeros(String str) {
+        return str.replaceFirst("^0+(?!$)", "");
     }
 }
